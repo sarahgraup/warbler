@@ -174,6 +174,13 @@ def show_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
+    # messages = (Message
+    #             .query
+    #             .filter_by(user_id=g.user.id))
+    #             .order_by(Message.timestamp.desc())
+    #             .limit(100)
+    #             .all())
+
     return render_template('users/show.html', user=user)
 
 

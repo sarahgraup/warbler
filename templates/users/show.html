@@ -1,9 +1,11 @@
 {% extends 'users/detail.html' %}
+
 {% block user_details %}
+
 <div class="col-sm-6">
   <ul class="list-group" id="messages">
 
-    {% for message in user.messages %}
+    {% for message in user.messages | sort(attribute='timestamp',reverse=True) %}
 
     <li class="list-group-item">
       <a href="/messages/{{ message.id }}" class="message-link"></a>
@@ -27,4 +29,5 @@
 
   </ul>
 </div>
+
 {% endblock %}
