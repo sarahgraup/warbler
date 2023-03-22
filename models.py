@@ -29,7 +29,7 @@ class Follows(db.Model):
         primary_key=True,
     )
 
-
+# TODO: length constraints?
 class User(db.Model):
     """User in the system."""
 
@@ -84,6 +84,8 @@ class User(db.Model):
         secondaryjoin=(Follows.user_following_id == id),
         backref="following",
     )
+    # print(g.user.following)
+    # [<User #71: john05, jackschneider@example.org>, ...]
 
     def __repr__(self):
         return f"<User #{self.id}: {self.username}, {self.email}>"

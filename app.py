@@ -12,8 +12,8 @@ from models import db, connect_db, User, Message
 load_dotenv()
 
 CURR_USER_KEY = "curr_user"
-DEFAULT_IMAGE_URL ="/static/images/default-pic.png"
-DEFAULT_HEADER_IMAGE_URL ="/static/images/warbler_hero.jpg"
+DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
+DEFAULT_HEADER_IMAGE_URL = "/static/images/warbler_hero.jpg"
 
 
 app = Flask(__name__)
@@ -45,6 +45,7 @@ def add_user_to_g():
 @app.before_request
 def add_form_to_g():
     "if a g.user exists, then add curr form to Flask global"
+    # TODO: doc string could be clearer - curr form?
 
     if g.user:
         g.csrf_form = CsrfForm()
@@ -207,7 +208,9 @@ def start_following(follow_id):
     Redirect to following page for the current for the current user.
     """
 
-    if not g.user:
+    form = g.csrf_form
+
+    if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
@@ -225,7 +228,9 @@ def stop_following(follow_id):
     Redirect to following page for the current for the current user.
     """
 
-    if not g.user:
+    form = g.csrf_form
+
+    if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
@@ -254,8 +259,8 @@ def edit_profile():
         if User.authenticate(user.username, form.password.data):
             user.email = form.email.data
             user.username = form.username.data
-            user.image_url = request.form.get('image_url', user.image_url) or DEFAULT_IMAGE_URL
-            user.header_image_url = request.form.get('header_image_url', user.header_image_url) or DEFAULT_HEADER_IMAGE_URL
+            user.image_url = form.image_url.data.strip() or DEFAULT_IMAGE_URL
+            user.header_image_url = form.header_image_url.data.strip() or DEFAULT_HEADER_IMAGE_URL
             user.bio = form.bio.data
 
             db.session.commit()
@@ -274,12 +279,15 @@ def delete_user():
     Redirect to signup page.
     """
 
-    if not g.user:
+    form = g.csrf_form
+
+    if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
     do_logout()
 
+    Message.query.filter_by(user_id=g.user.id).delete()
     db.session.delete(g.user)
     db.session.commit()
 
@@ -332,7 +340,9 @@ def delete_message(message_id):
     Redirect to user page on success.
     """
 
-    if not g.user:
+    form = g.csrf_form
+
+    if not g.user or not form.validate_on_submit():
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
@@ -355,21 +365,15 @@ def homepage():
     - logged in: 100 most recent messages of followed_users
     """
 
-    # TODO: Step 6: Fix homepage
-    # The homepage for logged-in-users should show the last 100 warbles
-    # only from the users that the logged-in user is following,
-    # and that user, rather than warbles from all users.
+    # FIXME: add our own msgs to hompage
 
     if g.user:
-        # print(g.user.following)
-        # [<User #71: john05, jackschneider@example.org>, ...]
 
-        following_ids = [user.id for user in g.user.following]
-        print("FOLLOWING IDS", following_ids)
+        homepage_ids = [user.id for user in g.user.following] + [g.user.id]
 
         messages = (Message
                     .query
-                    .filter(Message.user_id.in_(following_ids))
+                    .filter(Message.user_id.in_(homepage_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
