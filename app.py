@@ -38,6 +38,13 @@ def add_user_to_g():
     else:
         g.user = None
 
+@app.before_request
+def add_form_to_g():
+    "if a g.user exists, then add curr form to Flask global"
+
+    if g.user:
+        g.csrf_form = CsrfForm()
+
 
 def do_login(user):
     """Log in user."""
@@ -115,21 +122,17 @@ def login():
 def logout():
     """Handle logout of user and redirect to homepage."""
 
-    if CURR_USER_KEY not in session or g.user != session[CURR_USER_KEY]:
-        raise Unauthorized()
-
-    form = g.CsrfForm()
+    form = g.csrf_form
 
     if form.validate_on_submit():
-        session.pop(CURR_USER_KEY)
-        return redirect("/login")
+        if g.user:
+            do_logout()
+            flash("success you logged out!")
+            return redirect("/login")
 
     else:
         # didn't pass CSRF; ignore logout attempt
         raise Unauthorized()
-
-    # IMPLEMENT THIS AND FIX BUG
-    # DO NOT CHANGE METHOD ON ROUTE
 
 
 
