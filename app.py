@@ -12,6 +12,9 @@ from models import db, connect_db, User, Message
 load_dotenv()
 
 CURR_USER_KEY = "curr_user"
+DEFAULT_IMAGE_URL ="/static/images/default-pic.png"
+DEFAULT_HEADER_IMAGE_URL ="/static/images/warbler_hero.jpg"
+
 
 app = Flask(__name__)
 
@@ -248,16 +251,20 @@ def edit_profile():
 
     if form.validate_on_submit():
 
-        if User.authenticate(user.username, form.data.password):
+        if User.authenticate(user.username, form.password.data):
             user.email = form.email.data
             user.username = form.username.data
-            user.image_url = form.image_url.data
-            user.header_image_url = form.header_image_url.data
+            user.image_url = request.form.get('image_url', user.image_url) or DEFAULT_IMAGE_URL
+            user.header_image_url = request.form.get('header_image_url', user.header_image_url) or DEFAULT_HEADER_IMAGE_URL
             user.bio = form.bio.data
 
             db.session.commit()
             return redirect(f"/users/{user.id}")
-    render_template('users/edit.html', form = form)
+
+        else:
+            flash("Incorrect password.")
+
+    return render_template('users/edit.html', form=form)
 
 
 @app.post('/users/delete')
@@ -348,9 +355,21 @@ def homepage():
     - logged in: 100 most recent messages of followed_users
     """
 
+    # TODO: Step 6: Fix homepage
+    # The homepage for logged-in-users should show the last 100 warbles
+    # only from the users that the logged-in user is following,
+    # and that user, rather than warbles from all users.
+
     if g.user:
+        # print(g.user.following)
+        # [<User #71: john05, jackschneider@example.org>, ...]
+
+        following_ids = [user.id for user in g.user.following]
+        print("FOLLOWING IDS", following_ids)
+
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(following_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
