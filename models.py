@@ -84,6 +84,12 @@ class User(db.Model):
         secondaryjoin=(Follows.user_following_id == id),
         backref="following",
     )
+
+    liked_messages = db.relationship(
+        "Message",
+        secondary = "likes"
+    )
+
     # print(g.user.following)
     # [<User #71: john05, jackschneider@example.org>, ...]
 
@@ -171,6 +177,24 @@ class Message(db.Model):
         db.ForeignKey('users.id', ondelete='CASCADE'),
         nullable=False,
     )
+
+class Like(db.Model):
+    """Connection of a follower <-> liked message."""
+
+    __tablename__ = 'likes'
+
+    user_id= db.Column(
+        db.Integer,
+        db.ForeignKey('users.id', ondelete="cascade"),
+        primary_key=True,
+    )
+
+    message_id = db.Column(
+        db.Integer,
+        db.ForeignKey('messages.id', ondelete="cascade"),
+        primary_key=True,
+    )
+
 
 
 def connect_db(app):

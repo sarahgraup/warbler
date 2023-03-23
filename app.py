@@ -44,8 +44,7 @@ def add_user_to_g():
 
 @app.before_request
 def add_form_to_g():
-    "if a g.user exists, then add curr form to Flask global"
-    # TODO: doc string could be clearer - curr form?
+    "if a g.user exists, then add CSRF form protectection to Flask global"
 
     if g.user:
         g.csrf_form = CsrfForm()
@@ -174,13 +173,6 @@ def show_user(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    # messages = (Message
-    #             .query
-    #             .filter_by(user_id=g.user.id))
-    #             .order_by(Message.timestamp.desc())
-    #             .limit(100)
-    #             .all())
-
     return render_template('users/show.html', user=user)
 
 
@@ -252,7 +244,6 @@ def stop_following(follow_id):
 def edit_profile():
     """Update profile for current user."""
 
-    # IMPLEMENT THIS
     user = g.user
 
     if not user:
@@ -299,6 +290,43 @@ def delete_user():
     db.session.commit()
 
     return redirect("/signup")
+
+
+@app.get('/users/<int:user_id>/likes')
+def show_liked_messages(user_id):
+    """Shows likes page for given user"""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    liked_messages = user.liked_messages
+
+    return render_template('/users/likes.html', user=user, liked_messages=liked_messages)
+
+
+@app.post('/messages/<int:message_id>/like')
+def like_message(message_id):
+    """adding or removing a given message from a users liked messages"""
+    
+    form = g.csrf_form
+
+    if not g.user or not form.validate_on_submit():
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    liked_message = Message.query.get_or_404(message_id)
+    
+    if liked_message not in g.user.liked_messages:
+        g.user.liked_messages.append(liked_message)
+    else:
+       g.user.liked_messages.remove(liked_message) 
+
+    db.session.commit()
+
+
+
 
 
 ##############################################################################
