@@ -39,6 +39,14 @@
                 </a>
               </h4>
             </li>
+            <li class="stat">
+              <p class="small">Likes</p>
+              <h4>
+                <a href="/users/{{ g.user.id }}/likes">
+                  {{ g.user.liked_messages | length }}
+                </a>
+              </h4>
+            </li>
           </ul>
         </div>
       </div>
@@ -46,19 +54,39 @@
 
     <div class="col-lg-6 col-md-8 col-sm-12">
       <ul class="list-group" id="messages">
+
         {% for msg in messages %}
           <li class="list-group-item">
             <a href="/messages/{{ msg.id }}" class="message-link"/>
             <a href="/users/{{ msg.user.id }}">
               <img src="{{ msg.user.image_url }}" alt="" class="timeline-image">
             </a>
-            <div class="message-area">
-              <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
-              <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
-              <p>{{ msg.text }}</p>
-            </div>
+              <div class="message-area">
+                <a href="/users/{{ msg.user.id }}">@{{ msg.user.username }}</a>
+                <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
+
+                <p>{{ msg.text }}</p>
+
+              </div>
+            </a>
+
+            <!-- like / unlike icon -->
+            {% if g.user.id != msg.user.id %}
+              <form method="POST" action="/messages/{{ msg.id }}/like">
+              {{ g.csrf_form.hidden_tag() }}
+              <!-- # TODO: toggle fill/unfill  -->
+              {% if msg in g.user.liked_messages %}
+              <button class="bi bi-star-fill messages-like-bottom"></button>
+              {% else %}
+              <button class="bi bi-star messages-like-bottom"></button>
+              {% endif %}
+              <!-- <input type="hidden" value="{{next}}" name="hidden_next"> -->
+              </form>
+            {% endif %}
+
           </li>
         {% endfor %}
+
       </ul>
     </div>
 

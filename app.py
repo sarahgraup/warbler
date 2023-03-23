@@ -24,6 +24,8 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = True
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 toolbar = DebugToolbarExtension(app)
 
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
+
 connect_db(app)
 
 
@@ -303,13 +305,15 @@ def show_liked_messages(user_id):
     user = User.query.get_or_404(user_id)
     liked_messages = user.liked_messages
 
+    # TODO: no need to pass in liked messages - can access them from user. just pass in user
     return render_template('/users/likes.html', user=user, liked_messages=liked_messages)
 
-
+# TODO: change name to reflect toggling liking/disliking functionality
 @app.post('/messages/<int:message_id>/like')
 def like_message(message_id):
-    """adding or removing a given message from a users liked messages"""
-    
+    """adding or removing a given message from a users liked messages
+    redirects to user likes page"""
+
     form = g.csrf_form
 
     if not g.user or not form.validate_on_submit():
@@ -317,13 +321,24 @@ def like_message(message_id):
         return redirect("/")
 
     liked_message = Message.query.get_or_404(message_id)
-    
+
     if liked_message not in g.user.liked_messages:
         g.user.liked_messages.append(liked_message)
     else:
-       g.user.liked_messages.remove(liked_message) 
+       g.user.liked_messages.remove(liked_message)
 
     db.session.commit()
+
+    # response = request.form.get("hidden_next", "/")
+    # print("PRINT STATEMENTS")
+    # print(response)
+    # return redirect(response)
+
+    # TODO: figure out a better place to redirect upon liking/disliking msg
+    # need to redirect to where you were
+    return redirect(f'/users/{g.user.id}/likes')
+
+
 
 
 

@@ -89,6 +89,7 @@ class User(db.Model):
         "Message",
         secondary = "likes"
     )
+    # TODO: consider adding a backref
 
     # print(g.user.following)
     # [<User #71: john05, jackschneider@example.org>, ...]
@@ -179,6 +180,7 @@ class Message(db.Model):
     )
 
 class Like(db.Model):
+    # TODO: not a follower -> liked message, its a user -> message
     """Connection of a follower <-> liked message."""
 
     __tablename__ = 'likes'

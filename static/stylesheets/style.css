@@ -513,6 +513,8 @@ p.card-bio {
   top: 4px;
   right: 4px;
   z-index: 1;
+  border: 0;
+  background: transparent;
 }
 
 .messages-like-bottom {
@@ -520,6 +522,8 @@ p.card-bio {
   bottom: 4px;
   right: 4px;
   z-index: 1;
+  border: 0;
+  background: transparent;
 }
 
 .single-message {

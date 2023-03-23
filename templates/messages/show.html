@@ -24,16 +24,19 @@
             {% if g.user.id == message.user.id %}
             <form method="POST"
                   action="/messages/{{ message.id }}/delete">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-danger">Delete</button>
             </form>
             {% elif g.user.is_following(message.user) %}
             <form method="POST"
                   action="/users/stop-following/{{ message.user.id }}">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-primary">Unfollow</button>
             </form>
             {% else %}
             <form method="POST"
                   action="/users/follow/{{ message.user.id }}">
+              {{ g.csrf_form.hidden_tag() }}
               <button class="btn btn-outline-primary btn-sm">
                 Follow
               </button>
@@ -41,10 +44,29 @@
             {% endif %}
             {% endif %}
           </div>
-          <p class="single-message">{{ message.text }}</p>
+
+          <p class="single-message">
+            {{ message.text }}
+          </p>
+
+          <!-- like / unlike icon -->
+          {% if g.user.id != msg.user.id %}
+            <form method="POST" action="/messages/{{ msg.id }}/like">
+            {{ g.csrf_form.hidden_tag() }}
+            <!-- # TODO: toggle fill/unfill  -->
+            {% if msg in g.user.liked_messages %}
+            <button class="bi bi-star-fill messages-like-bottom"></button>
+            {% else %}
+            <button class="bi bi-star messages-like-bottom"></button>
+            {% endif %}
+            <!-- TODO: hard code template path in hidden input, for each template -->
+            <!-- <input type="hidden" value="{{next}}" name="hidden_next"> -->
+            </form>
+          {% endif %}
+
           <span class="text-muted">
               {{ message.timestamp.strftime('%d %B %Y') }}
-            </span>
+          </span>
         </div>
       </li>
     </ul>

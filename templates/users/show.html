@@ -20,7 +20,22 @@
         <a href="/users/{{ user.id }}">@{{ user.username }}</a>
         <span class="text-muted">
               {{ message.timestamp.strftime('%d %B %Y') }}
-            </span>
+        </span>
+
+        <!-- like / unlike icon -->
+        {% if g.user.id != message.user.id %}
+        <form method="POST" action="/messages/{{ message.id }}/like">
+        {{ g.csrf_form.hidden_tag() }}
+        <!-- # TODO: toggle fill/unfill  -->
+        {% if message in g.user.liked_messages %}
+        <button class="bi bi-star-fill messages-like-bottom"></button>
+        {% else %}
+        <button class="bi bi-star messages-like-bottom"></button>
+        {% endif %}
+        <!-- <input type="hidden" value="{{next}}" name="hidden_next"> -->
+        </form>
+        {% endif %}
+
         <p>{{ message.text }}</p>
       </div>
     </li>
