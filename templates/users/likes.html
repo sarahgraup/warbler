@@ -48,14 +48,12 @@
           {% if g.user.id != message.user.id %}
           <form method="POST" action="/messages/{{ message.id }}/like">
             {{ g.csrf_form.hidden_tag() }}
-            <!-- # TODO: toggle fill/unfill  -->
             {% if message in g.user.liked_messages %}
             <button class="bi bi-star-fill messages-like-bottom"></button>
             {% else %}
             <button class="bi bi-star messages-like-bottom"></button>
             {% endif %}
-            <!-- # TODO: hard code path to template in hidden input -->
-            <!-- <input type="hidden" value="/users/{{ message.user.id }}/likes" name="hidden_next"> -->
+            <input type="hidden" value="/users/{{ message.user.id }}/likes" name="hidden_next">
           </form>
           {% endif %}
 

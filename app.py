@@ -305,12 +305,11 @@ def show_liked_messages(user_id):
     user = User.query.get_or_404(user_id)
     liked_messages = user.liked_messages
 
-    # TODO: no need to pass in liked messages - can access them from user. just pass in user
-    return render_template('/users/likes.html', user=user, liked_messages=liked_messages)
+    return render_template('/users/likes.html', user=user)
 
-# TODO: change name to reflect toggling liking/disliking functionality
+
 @app.post('/messages/<int:message_id>/like')
-def like_message(message_id):
+def toggle_like_message(message_id):
     """adding or removing a given message from a users liked messages
     redirects to user likes page"""
 
@@ -329,14 +328,9 @@ def like_message(message_id):
 
     db.session.commit()
 
-    # response = request.form.get("hidden_next", "/")
-    # print("PRINT STATEMENTS")
-    # print(response)
-    # return redirect(response)
+    response = request.form.get("hidden_next", "/")
+    return redirect(response)
 
-    # TODO: figure out a better place to redirect upon liking/disliking msg
-    # need to redirect to where you were
-    return redirect(f'/users/{g.user.id}/likes')
 
 
 
@@ -414,8 +408,6 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of followed_users
     """
-
-    # FIXME: add our own msgs to hompage
 
     if g.user:
 
