@@ -358,6 +358,7 @@ def add_message():
         msg = Message(text=form.text.data)
         g.user.messages.append(msg)
         db.session.commit()
+        # breakpoint()
 
         return redirect(f"/users/{g.user.id}")
 
@@ -385,12 +386,12 @@ def delete_message(message_id):
     """
 
     form = g.csrf_form
+    msg = Message.query.get_or_404(message_id)
 
-    if not g.user or not form.validate_on_submit():
+    if not g.user or not form.validate_on_submit() or not g.user.id == msg.user_id:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-
-    msg = Message.query.get_or_404(message_id)
+ 
     db.session.delete(msg)
     db.session.commit()
 
