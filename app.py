@@ -13,7 +13,7 @@ load_dotenv()
 
 CURR_USER_KEY = "curr_user"
 DEFAULT_IMAGE_URL = "/static/images/default-pic.png"
-DEFAULT_HEADER_IMAGE_URL = "/static/images/warbler_hero.jpg"
+DEFAULT_HEADER_IMAGE_URL = "/static/images/warbler-hero.jpg"
 
 
 app = Flask(__name__)
@@ -259,8 +259,8 @@ def edit_profile():
         if User.authenticate(user.username, form.password.data):
             user.email = form.email.data
             user.username = form.username.data
-            user.image_url = form.image_url.data.strip() or DEFAULT_IMAGE_URL
-            user.header_image_url = form.header_image_url.data.strip() or DEFAULT_HEADER_IMAGE_URL
+            user.image_url = form.image_url.data or DEFAULT_IMAGE_URL
+            user.header_image_url = form.header_image_url.data or DEFAULT_HEADER_IMAGE_URL
             user.bio = form.bio.data
 
             db.session.commit()
@@ -391,7 +391,7 @@ def delete_message(message_id):
     if not g.user or not form.validate_on_submit() or not g.user.id == msg.user_id:
         flash("Access unauthorized.", "danger")
         return redirect("/")
- 
+
     db.session.delete(msg)
     db.session.commit()
 
